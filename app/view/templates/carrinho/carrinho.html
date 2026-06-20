@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Carrinho{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <span class="eyebrow">Antes de finalizar</span>
+    <h1>Meu carrinho</h1>
+</div>
+
+{% if itens %}
+<div class="lista-itens">
+    {% for item in itens %}
+    <div class="item-linha">
+        <div class="item-linha__info">
+            <span class="item-linha__nome">{{ item.produto.nome }}</span>
+            <span class="item-linha__detalhe">Qtd: {{ item.quantidade }} · R$ {{ "%.2f"|format(item.produto.preco) }} cada</span>
+        </div>
+        <div class="item-linha__acoes">
+            <span class="item-linha__nome">R$ {{ "%.2f"|format(item.quantidade * item.produto.preco) }}</span>
+            <form action="{{ url_for('carrinho.remover', item_id=item.id) }}" method="post">
+                <button type="submit" class="botao botao--perigo">Remover</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="resumo-total">
+    <span>Total</span>
+    <span class="resumo-total__valor">R$ {{ "%.2f"|format(total) }}</span>
+</div>
+
+<form action="{{ url_for('carrinho.finalizar') }}" method="post">
+    <button type="submit" class="botao botao--primario botao--bloco">Finalizar compra</button>
+</form>
+{% else %}
+<div class="estado-vazio">
+    <p>Seu carrinho está vazio.</p>
+    <a href="{{ url_for('usuario.home') }}" class="botao botao--primario">Ir para a vitrine</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titulo %}{{ produto.nome if produto else "Produto" }}{% endblock %}
+{% block conteudo %}
+{% if produto %}
+<div class="produto-detalhe">
+    <div class="produto-detalhe__imagem">
+        {% if produto.imagem %}
+            <img src="{{ produto.imagem }}" alt="{{ produto.nome }}">
+        {% else %}
+            sem imagem
+        {% endif %}
+    </div>
+    <div>
+        <span class="eyebrow">Detalhes do produto</span>
+        <h1>{{ produto.nome }}</h1>
+        <p class="produto-detalhe__preco">R$ {{ "%.2f"|format(produto.preco) }}</p>
+        <p>{{ produto.descricao or "Sem descrição cadastrada." }}</p>
+
+        {% if eh_vendedor_dono %}
+            <div style="display:flex; gap:0.8rem; margin-top:1.2rem;">
+                <a href="{{ url_for('vendedor.editar_produto', produto_id=produto.id) }}" class="botao botao--secundario">Editar produto</a>
+                <form action="{{ url_for('vendedor.deletar_produto', produto_id=produto.id) }}" method="post">
+                    <button type="submit" class="botao botao--perigo">Excluir produto</button>
+                </form>
+            </div>
+        {% else %}
+            <form action="{{ url_for('carrinho.adicionar', produto_id=produto.id) }}" method="post" style="display:flex; gap:0.8rem; margin-top:1.2rem; align-items:center;">
+                <input type="number" name="quantidade" value="1" min="1" style="width:80px; padding:0.6rem; border:1px solid var(--cor-borda); border-radius:var(--raio);">
+                <button type="submit" class="botao botao--primario">Adicionar ao carrinho</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="estado-vazio">
+    <p>Este produto não foi encontrado.</p>
+</div>
+{% endif %}
+{% endblock %}

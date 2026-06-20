@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Busca{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <span class="eyebrow">Resultado da busca</span>
+    <h1>{{ "\"%s\""|format(termo) if termo else "Todos os produtos" }}</h1>
+</div>
+
+{% if produtos %}
+<div class="grade-produtos">
+    {% for produto in produtos %}
+    <a class="cartao-produto" href="{{ url_for('produto.ver_produto', produto_id=produto.id) }}">
+        <div class="cartao-produto__imagem">
+            {% if produto.imagem %}
+                <img src="{{ produto.imagem }}" alt="{{ produto.nome }}">
+            {% else %}
+                sem imagem
+            {% endif %}
+        </div>
+        <div class="cartao-produto__corpo">
+            <span class="cartao-produto__nome">{{ produto.nome }}</span>
+            <span class="cartao-produto__preco">R$ {{ "%.2f"|format(produto.preco) }}</span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="estado-vazio">
+    <p>Nenhum produto encontrado para essa busca.</p>
+    <a href="{{ url_for('usuario.home') }}" class="botao botao--secundario">Voltar para a vitrine</a>
+</div>
+{% endif %}
+{% endblock %}

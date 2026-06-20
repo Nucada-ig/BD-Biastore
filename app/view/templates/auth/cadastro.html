@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Criar conta{% endblock %}
+{% block conteudo %}
+<div class="tela-auth">
+    <span class="eyebrow">Comece agora</span>
+    <h1>Criar conta</h1>
+    <p>Cadastre-se como cliente para comprar, ou marque a opção de vendedor para anunciar seus produtos.</p>
+
+    {% if erro %}<div class="mensagem-erro">{{ erro }}</div>{% endif %}
+
+    <form class="formulario" method="post">
+        <div class="campo">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required>
+        </div>
+        <div class="campo">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="voce@email.com" required>
+        </div>
+        <div class="campo">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+        </div>
+        <div class="campo campo--checkbox">
+            <input type="checkbox" id="is_vendedor" name="is_vendedor">
+            <label for="is_vendedor" style="margin:0;">Quero vender produtos na BIA-Store</label>
+        </div>
+        <button type="submit" class="botao botao--primario botao--bloco">Criar conta</button>
+    </form>
+
+    <p class="tela-auth__rodape">
+        Já tem conta? <a href="{{ url_for('auth.login') }}" style="color: var(--cor-destaque); font-weight:600;">Entrar</a>
+    </p>
+</div>
+{% endblock %}

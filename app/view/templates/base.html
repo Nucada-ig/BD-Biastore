@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}BIA-Store{% endblock %} · BIA-Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="topo">
+        {% if session.get('usuario_id') %}
+            {% if session.get('is_vendedor') %}
+            <a class="marca" href="{{ url_for('vendedor.home') }}">
+            {% else %}
+            <a class="marca" href="{{ url_for('usuario.home') }}">
+            {% endif %}
+        {% else %}
+            <a class="marca" href="{{ url_for('routes.index') }}">
+        {% endif %}
+            <span class="marca__selo">B</span>
+            <span class="marca__nome">BIA-Store</span>
+        </a>
+
+        {% if session.get('usuario_id') %}
+        <nav class="nav">
+            {% if session.get('is_vendedor') %}
+                <a href="{{ url_for('vendedor.cadastrar_produto') }}" class="nav__link {{ 'nav__link--ativo' if request.endpoint == 'vendedor.cadastrar_produto' }}">Novo produto</a>
+            {% else %}
+                <form class="nav__busca" action="{{ url_for('produto.pesquisa') }}" method="get">
+                    <input type="text" name="q" placeholder="Buscar produtos…" value="{{ request.args.get('q', '') }}">
+                </form>
+                <a href="{{ url_for('carrinho.ver_carrinho') }}" class="nav__link {{ 'nav__link--ativo' if request.endpoint == 'carrinho.ver_carrinho' }}">Carrinho</a>
+                <a href="{{ url_for('usuario.perfil') }}" class="nav__link {{ 'nav__link--ativo' if request.endpoint == 'usuario.perfil' }}">Perfil</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+    </header>
+
+    <main class="conteudo">
+        {% block conteudo %}{% endblock %}
+    </main>
+
+    <footer class="rodape">
+        <p>BIA-Store · projeto acadêmico de e-commerce</p>
+    </footer>
+</body>
+</html>

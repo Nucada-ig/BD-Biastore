@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Perfil{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <span class="eyebrow">Sua conta</span>
+    <h1>Perfil</h1>
+    <p>{{ usuario.email }}</p>
+</div>
+
+<form class="formulario" method="post">
+    <div class="campo">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" name="nome" value="{{ usuario.nome }}">
+    </div>
+    <div class="campo">
+        <label for="endereco">Endereço</label>
+        <input type="text" id="endereco" name="endereco" value="{{ usuario.endereco or '' }}" placeholder="Rua, número, bairro, cidade">
+    </div>
+    <button type="submit" class="botao botao--primario">Salvar alterações</button>
+</form>
+
+<p style="margin-top: 2.2rem; display:flex; gap:0.8rem;">
+    <a href="{{ url_for('usuario.pedidos') }}" class="botao botao--secundario">Ver meus pedidos</a>
+    <a href="{{ url_for('auth.logout') }}" class="botao botao--perigo">Sair da conta</a>
+</p>
+{% endblock %}
