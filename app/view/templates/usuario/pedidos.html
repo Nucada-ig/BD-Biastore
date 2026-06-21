@@ -9,20 +9,52 @@
 {% if pedidos %}
 <div class="lista-itens">
     {% for pedido in pedidos %}
-    <div class="item-linha">
-        <div class="item-linha__info">
-            <span class="item-linha__nome">Pedido #{{ pedido.id }}</span>
-            <span class="item-linha__detalhe">
-                {{ pedido.itens|length }} item(ns) · {{ pedido.data.strftime('%d/%m/%Y') if pedido.data else '' }}
-            </span>
+    <details class="pedido-expansivel">
+        <summary class="item-linha item-linha--clicavel">
+            <div class="item-linha__info">
+                <span class="item-linha__nome">Pedido #{{ pedido.pedido_id }}</span>
+                <span class="item-linha__detalhe">
+                    {{ pedido.itens|length }} item(ns) · {{ pedido.data_pedido.strftime('%d/%m/%Y') if pedido.data_pedido else '' }}
+                </span>
+            </div>
+            <div class="item-linha__acoes">
+                <span class="selo-status {{ 'selo-status--entregue' if pedido.status_pedido == 'ENTREGUE' else ('selo-status--caminho' if pedido.status_pedido == 'ENVIADO' else '') }}">
+                    {{ pedido.status_pedido }}
+                </span>
+                <span class="item-linha__nome">R$ {{ "%.2f"|format(pedido.total) }}</span>
+            </div>
+        </summary>
+
+        <div class="pedido-expansivel__detalhe">
+            <h3 class="pedido-expansivel__subtitulo">Produtos</h3>
+            <div class="lista-itens">
+                {% for item in pedido.itens %}
+                <div class="item-linha item-linha--simples">
+                    <div class="item-linha__info">
+                        <span class="item-linha__nome">{{ item.produto.nome_produto }}</span>
+                        <span class="item-linha__detalhe">Qtd: {{ item.quantidade }} · R$ {{ "%.2f"|format(item.preco_historico) }} cada</span>
+                    </div>
+                    <span class="item-linha__nome">R$ {{ "%.2f"|format(item.quantidade * item.preco_historico) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h3 class="pedido-expansivel__subtitulo">Pagamento</h3>
+            {% if pedido.pagamento %}
+            <p class="pedido-expansivel__pagamento">
+                {{ {
+                    "PIX": "PIX",
+                    "CARTAO_CREDITO": "Cartão de crédito",
+                    "BOLETO": "Boleto",
+                    "TRANSFERENCIA": "Transferência"
+                }.get(pedido.pagamento.metodo_pagamento, pedido.pagamento.metodo_pagamento) }}
+                · status: {{ pedido.pagamento.status_pagamento }}
+            </p>
+            {% else %}
+            <p class="pedido-expansivel__pagamento">Pagamento não informado.</p>
+            {% endif %}
         </div>
-        <div class="item-linha__acoes">
-            <span class="selo-status {{ 'selo-status--entregue' if pedido.status == 'entregue' else ('selo-status--caminho' if pedido.status == 'a caminho' else '') }}">
-                {{ pedido.status }}
-            </span>
-            <span class="item-linha__nome">R$ {{ "%.2f"|format(pedido.valor_total) }}</span>
-        </div>
-    </div>
+    </details>
     {% endfor %}
 </div>
 {% else %}

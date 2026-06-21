@@ -3,31 +3,178 @@
 {% block conteudo %}
 <div class="cabecalho-pagina">
     <span class="eyebrow">Resultado da busca</span>
-    <h1>{{ "\"%s\""|format(termo) if termo else "Todos os produtos" }}</h1>
+    <h1>{{ '"%s"'|format(termo) if termo else "Todos os produtos" }}</h1>
 </div>
 
+{# ── Filtro por categoria ── #}
+{% if categorias %}
+<div class="filtro-wrapper">
+    <button class="filtro-toggle {% if categoria_ativa %}filtro-toggle--ativo{% endif %}"
+            id="filtro-toggle" aria-expanded="false" aria-controls="filtro-categorias"
+            title="Filtrar por categoria">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+            <line x1="11" y1="18" x2="13" y2="18"/>
+        </svg>
+        {% if categoria_ativa %}
+        <span class="filtro-toggle__label">{{ categoria_ativa | replace('_', ' ') | title }}</span>
+        {% endif %}
+    </button>
+
+    <div class="filtro-categorias" id="filtro-categorias" hidden>
+        <a class="filtro-categorias__pill {% if not categoria_ativa %}filtro-categorias__pill--ativo{% endif %}"
+           href="{{ url_for('produto.pesquisa', q=termo) }}">Todos</a>
+        {% for cat in categorias %}
+        <a class="filtro-categorias__pill {% if cat == categoria_ativa %}filtro-categorias__pill--ativo{% endif %}"
+           href="{{ url_for('produto.pesquisa', q=termo, categoria=cat) }}">
+            {{ cat | replace('_', ' ') | title }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+(function () {
+    var btn = document.getElementById('filtro-toggle');
+    var painel = document.getElementById('filtro-categorias');
+    {% if categoria_ativa %}
+    painel.removeAttribute('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+    {% endif %}
+    btn.addEventListener('click', function () {
+        var aberto = !painel.hasAttribute('hidden');
+        if (aberto) {
+            painel.setAttribute('hidden', '');
+            btn.setAttribute('aria-expanded', 'false');
+        } else {
+            painel.removeAttribute('hidden');
+            btn.setAttribute('aria-expanded', 'true');
+        }
+    });
+})();
+</script>
+{% endif %}
+
 {% if produtos %}
-<div class="grade-produtos">
+<div class="barra-pesquisa">
+    <p class="barra-pesquisa__contagem" id="contagem-resultados">
+        <strong>{{ produtos|length }}</strong> produto{{ 's' if produtos|length != 1 else '' }} encontrado{{ 's' if produtos|length != 1 else '' }}
+    </p>
+    <div class="barra-pesquisa__ordenacao">
+        <span class="barra-pesquisa__label">Ordenar:</span>
+        <button class="btn-ordenar btn-ordenar--ativo" data-ordem="relevancia">Relevância</button>
+        <button class="btn-ordenar" data-ordem="preco-asc">Menor preço</button>
+        <button class="btn-ordenar" data-ordem="preco-desc">Maior preço</button>
+        <button class="btn-ordenar" data-ordem="nome-az">A – Z</button>
+    </div>
+</div>
+
+<div class="grade-produtos" id="grade-produtos">
     {% for produto in produtos %}
-    <a class="cartao-produto" href="{{ url_for('produto.ver_produto', produto_id=produto.id) }}">
-        <div class="cartao-produto__imagem">
+    {% set esgotado = produto.estoque == 0 %}
+    {% set ultimas  = produto.estoque > 0 and produto.estoque <= 5 %}
+    <a class="cartao-produto"
+       href="{{ url_for('produto.ver_produto', produto_id=produto.produto_id) }}"
+       data-preco="{{ produto.preco_unitario }}"
+       data-nome="{{ produto.nome_produto }}">
+
+        <div class="cartao-produto__imagem {% if esgotado %}cartao-produto__imagem--esgotada{% endif %}">
             {% if produto.imagem %}
-                <img src="{{ produto.imagem }}" alt="{{ produto.nome }}">
+                <img src="{{ produto.imagem }}" alt="{{ produto.nome_produto }}">
             {% else %}
-                sem imagem
+                <div class="cartao-produto__placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2"/>
+                        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                        <line x1="12" y1="12" x2="12" y2="16"/>
+                        <line x1="10" y1="14" x2="14" y2="14"/>
+                    </svg>
+                    <span>{{ produto.categoria }}</span>
+                </div>
             {% endif %}
+
+            <div class="cartao-produto__badges">
+                <span class="cartao-produto__badge cartao-produto__badge--categoria">{{ produto.categoria }}</span>
+                {% if esgotado %}
+                    <span class="cartao-produto__badge cartao-produto__badge--esgotado">Esgotado</span>
+                {% elif ultimas %}
+                    <span class="cartao-produto__badge cartao-produto__badge--alerta">Últimas unidades</span>
+                {% endif %}
+            </div>
         </div>
+
         <div class="cartao-produto__corpo">
-            <span class="cartao-produto__nome">{{ produto.nome }}</span>
-            <span class="cartao-produto__preco">R$ {{ "%.2f"|format(produto.preco) }}</span>
+            <span class="cartao-produto__nome">{{ produto.nome_produto }}</span>
+            <div class="cartao-produto__rodape">
+                {% if esgotado %}
+                    <span class="cartao-produto__preco cartao-produto__preco--esgotado">Indisponível</span>
+                {% else %}
+                    <span class="cartao-produto__preco">R$ {{ "%.2f"|format(produto.preco_unitario) }}</span>
+                    {% if ultimas %}
+                        <span class="cartao-produto__estoque">{{ produto.estoque }} restante(s)</span>
+                    {% endif %}
+                {% endif %}
+            </div>
         </div>
+
     </a>
     {% endfor %}
 </div>
+
+<script>
+(function () {
+    var btnOrdenar = document.querySelectorAll('.btn-ordenar');
+    var grade = document.getElementById('grade-produtos');
+
+    btnOrdenar.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            btnOrdenar.forEach(function (b) { b.classList.remove('btn-ordenar--ativo'); });
+            btn.classList.add('btn-ordenar--ativo');
+
+            var cards = Array.from(grade.querySelectorAll('.cartao-produto'));
+            var ordem = btn.dataset.ordem;
+
+            cards.sort(function (a, b) {
+                if (ordem === 'preco-asc')  return parseFloat(a.dataset.preco) - parseFloat(b.dataset.preco);
+                if (ordem === 'preco-desc') return parseFloat(b.dataset.preco) - parseFloat(a.dataset.preco);
+                if (ordem === 'nome-az')    return a.dataset.nome.localeCompare(b.dataset.nome, 'pt-BR');
+                return 0; // relevancia: ordem original
+            });
+
+            // reordenar sem perder o estado original (relevância guarda índice via order)
+            if (ordem === 'relevancia') {
+                cards.forEach(function (c, i) { c.style.order = ''; });
+            } else {
+                cards.forEach(function (c, i) { c.style.order = i; });
+            }
+        });
+    });
+})();
+</script>
+
 {% else %}
-<div class="estado-vazio">
-    <p>Nenhum produto encontrado para essa busca.</p>
-    <a href="{{ url_for('usuario.home') }}" class="botao botao--secundario">Voltar para a vitrine</a>
+<div class="estado-vazio estado-vazio--pesquisa">
+    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="1.5"
+         stroke-linecap="round" stroke-linejoin="round"
+         style="display:block;margin:0 auto 1rem;">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <line x1="11" y1="8" x2="11" y2="14"/>
+        <line x1="8" y1="11" x2="14" y2="11"/>
+    </svg>
+    <p style="font-size:1.05rem;font-weight:500;color:var(--cor-texto);margin-bottom:0.4rem;">
+        Nenhum produto encontrado{% if termo %} para "{{ termo }}"{% endif %}
+    </p>
+    <p>Tente buscar por outra palavra ou explore a vitrine.</p>
+    <a href="{{ url_for('usuario.home') }}" class="botao botao--secundario" style="margin-top:0.8rem;">
+        Ver todos os produtos
+    </a>
 </div>
 {% endif %}
 {% endblock %}

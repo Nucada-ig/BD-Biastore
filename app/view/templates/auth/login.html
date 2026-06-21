@@ -23,5 +23,60 @@
     <p class="tela-auth__rodape">
         Ainda não tem conta? <a href="{{ url_for('auth.cadastro') }}" style="color: var(--cor-destaque); font-weight:600;">Criar conta</a>
     </p>
+
+    <div class="atalhos-teste">
+        <span class="atalhos-teste__label">Preencher como:</span>
+        <div class="dropdown-teste">
+            <button type="button" class="dropdown-teste__gatilho" id="dropdown-teste-btn">
+                Selecionar conta
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="dropdown-teste__menu" id="dropdown-teste-menu" hidden>
+                <p class="dropdown-teste__grupo-label">Clientes</p>
+                <button class="btn-teste" data-email="cliente@teste.com"         data-senha="123456">Cliente Teste</button>
+                <button class="btn-teste" data-email="ana.lima@teste.com"        data-senha="123456">Ana Lima</button>
+                <button class="btn-teste" data-email="bruno.souza@teste.com"     data-senha="123456">Bruno Souza</button>
+                <button class="btn-teste" data-email="carla.mendes@teste.com"    data-senha="123456">Carla Mendes</button>
+                <button class="btn-teste" data-email="diego.oliveira@teste.com"  data-senha="123456">Diego Oliveira</button>
+                <button class="btn-teste" data-email="fernanda.costa@teste.com"  data-senha="123456">Fernanda Costa</button>
+                <p class="dropdown-teste__grupo-label">Vendedores</p>
+                <button class="btn-teste" data-email="loja@techstore.com"        data-senha="123456">TechStore</button>
+                <button class="btn-teste" data-email="loja@mundokids.com"        data-senha="123456">Mundo Kids</button>
+                <button class="btn-teste" data-email="loja@bitshop.com"          data-senha="123456">BitShop</button>
+                <button class="btn-teste" data-email="loja@ativaesportes.com"    data-senha="123456">Ativa Esportes</button>
+                <button class="btn-teste" data-email="loja@naturabeleza.com"     data-senha="123456">Natura Beleza</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+(function () {
+    var gatilho = document.getElementById('dropdown-teste-btn');
+    var menu    = document.getElementById('dropdown-teste-menu');
+
+    gatilho.addEventListener('click', function () {
+        var aberto = !menu.hasAttribute('hidden');
+        aberto ? menu.setAttribute('hidden', '') : menu.removeAttribute('hidden');
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!gatilho.contains(e.target) && !menu.contains(e.target)) {
+            menu.setAttribute('hidden', '');
+        }
+    });
+
+    document.querySelectorAll('.btn-teste').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.getElementById('email').value = btn.dataset.email;
+            document.getElementById('senha').value = btn.dataset.senha;
+            menu.setAttribute('hidden', '');
+        });
+    });
+})();
+</script>
 {% endblock %}

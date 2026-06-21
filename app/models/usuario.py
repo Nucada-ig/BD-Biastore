@@ -4,38 +4,41 @@ from app.database import db
 class Usuario(db.Model):
     """
     Representa o cliente que compra na plataforma.
-    Pode também ser vendedor, indicado pelo campo `is_vendedor`.
+
+    A chave primária é o CPF (conforme o banco relacional já existente),
+    e não um id autoincrement - 'id' existe na tabela apenas como coluna
+    auxiliar com restrição UNIQUE, herdada do schema original.
+
+    Vendedores são uma entidade totalmente separada (ver Vendedor),
+    sem nenhuma ligação direta com Usuario no banco.
     """
     __tablename__ = "usuario"
 
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), nullable=False, unique=True)
+    cpf = db.Column(db.String(11), primary_key=True)
+    id = db.Column(db.Integer, unique=True, nullable=False)
+    nome = db.Column(db.String(250), nullable=False)
+    email = db.Column(db.String(250), nullable=False)
     senha = db.Column(db.String(255), nullable=False)
-    endereco = db.Column(db.String(255), nullable=True)
 
-    # Indica se este usuário também atua como vendedor
-    is_vendedor = db.Column(db.Boolean, default=False, nullable=False)
-
-    # Relação 1:1 -> cada usuário possui um único carrinho
-    carrinho = db.relationship(
-        "Carrinho",
+    # Relação 1:N -> um usuário pode ter vários telefones
+    telefones = db.relationship(
+        "TelefoneCliente",
         back_populates="usuario",
-        uselist=False,
         cascade="all, delete-orphan"
     )
 
-    # Relação 1:N -> um usuário pode ter vários pedidos
+    # Relação 1:N -> um usuário pode ter vários endereços cadastrados
+    enderecos = db.relationship(
+        "Endereco",
+        back_populates="usuario",
+        cascade="all, delete-orphan"
+    )
+
+    # Relação 1:N -> um usuário pode ter vários pedidos (inclui o
+    # "carrinho atual", que é um Pedido com status PROCESSANDO)
     pedidos = db.relationship(
         "Pedido",
         back_populates="usuario",
-        cascade="all, delete-orphan"
-    )
-
-    # Relação 1:N -> um usuário (quando vendedor) pode ter vários produtos cadastrados
-    produtos = db.relationship(
-        "Produto",
-        back_populates="vendedor",
         cascade="all, delete-orphan"
     )
 
@@ -45,12 +48,11 @@ class Usuario(db.Model):
         Não inclui a senha por padrão.
         """
         return {
+            "cpf": self.cpf,
             "id": self.id,
             "nome": self.nome,
             "email": self.email,
-            "endereco": self.endereco,
-            "is_vendedor": self.is_vendedor,
         }
 
     def __repr__(self):
-        return f"<Usuario {self.id} - {self.nome}>"
+        return f"<Usuario {self.cpf} - {self.nome}>"

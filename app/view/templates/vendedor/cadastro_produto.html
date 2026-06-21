@@ -7,23 +7,94 @@
 </div>
 
 <form class="formulario formulario--largo" method="post">
+
+    <h3 class="secao-titulo">Informações básicas</h3>
     <div class="campo">
-        <label for="nome">Nome do produto</label>
-        <input type="text" id="nome" name="nome" value="{{ produto.nome if produto else '' }}" placeholder="Ex: Camiseta básica" required>
+        <label for="nome_produto">Nome do produto</label>
+        <input type="text" id="nome_produto" name="nome_produto"
+               value="{{ produto.nome_produto if produto else '' }}"
+               placeholder="Ex: Camiseta básica" required>
     </div>
-    <div class="campo">
-        <label for="preco">Preço (R$)</label>
-        <input type="number" step="0.01" min="0" id="preco" name="preco" value="{{ produto.preco if produto else '' }}" placeholder="0.00" required>
+    <div class="grade-campos">
+        <div class="campo">
+            <label for="categoria">Categoria</label>
+            <input type="text" id="categoria" name="categoria"
+                   value="{{ produto.categoria if produto else '' }}"
+                   placeholder="Ex: Vestuário" required>
+        </div>
+        <div class="campo">
+            <label for="preco_unitario">Preço (R$)</label>
+            <input type="number" step="0.01" min="0" id="preco_unitario" name="preco_unitario"
+                   value="{{ produto.preco_unitario if produto else '' }}"
+                   placeholder="0.00" required>
+        </div>
+        <div class="campo">
+            <label for="estoque">Estoque</label>
+            <input type="number" step="1" min="0" id="estoque" name="estoque"
+                   value="{{ produto.estoque if produto else 0 }}"
+                   placeholder="0" required>
+        </div>
     </div>
     <div class="campo">
         <label for="imagem">URL da imagem</label>
-        <input type="text" id="imagem" name="imagem" value="{{ produto.imagem if produto else '' }}" placeholder="https://exemplo.com/imagem.jpg">
+        <input type="text" id="imagem" name="imagem"
+               value="{{ produto.imagem if produto else '' }}"
+               placeholder="https://exemplo.com/imagem.jpg">
     </div>
+
+    <hr class="divisor">
+    <h3 class="secao-titulo">Descrição</h3>
     <div class="campo">
-        <label for="descricao">Descrição</label>
-        <textarea id="descricao" name="descricao" rows="4" placeholder="Detalhes sobre o produto">{{ produto.descricao if produto else '' }}</textarea>
+        <label for="descricao">Descrição do produto</label>
+        <textarea id="descricao" name="descricao" rows="4"
+                  placeholder="Descreva o produto: características, diferenciais, como usar…">{{ produto.descricao if produto and produto.descricao else '' }}</textarea>
     </div>
-    <button type="submit" class="botao botao--primario">{{ "Salvar alterações" if produto else "Cadastrar produto" }}</button>
+
+    <hr class="divisor">
+    <h3 class="secao-titulo">Especificações</h3>
+    <div class="grade-campos">
+        <div class="campo">
+            <label for="material">Material / Composição</label>
+            <input type="text" id="material" name="material"
+                   value="{{ produto.material if produto and produto.material else '' }}"
+                   placeholder="Ex: 100% algodão">
+        </div>
+        <div class="campo">
+            <label for="peso">Peso</label>
+            <input type="text" id="peso" name="peso"
+                   value="{{ produto.peso if produto and produto.peso else '' }}"
+                   placeholder="Ex: 350g">
+        </div>
+        <div class="campo">
+            <label for="dimensoes">Dimensões</label>
+            <input type="text" id="dimensoes" name="dimensoes"
+                   value="{{ produto.dimensoes if produto and produto.dimensoes else '' }}"
+                   placeholder="Ex: 30 × 20 × 10 cm">
+        </div>
+    </div>
+
+    <hr class="divisor">
+    <h3 class="secao-titulo">Entrega</h3>
+    <div class="campo" style="max-width:220px;">
+        <label for="prazo_entrega">Prazo de entrega estimado (dias úteis)</label>
+        <input type="number" min="1" id="prazo_entrega" name="prazo_entrega"
+               value="{{ produto.prazo_entrega if produto and produto.prazo_entrega else '' }}"
+               placeholder="Ex: 7">
+    </div>
+
+    <hr class="divisor">
+    <h3 class="secao-titulo">Troca e devolução</h3>
+    <div class="campo">
+        <label for="politica_troca">Política de troca / devolução</label>
+        <textarea id="politica_troca" name="politica_troca" rows="3"
+                  placeholder="Ex: Aceitamos trocas em até 30 dias após o recebimento…">{{ produto.politica_troca if produto and produto.politica_troca else '' }}</textarea>
+    </div>
+
+    <div style="margin-top:0.6rem;">
+        <button type="submit" class="botao botao--primario">
+            {{ "Salvar alterações" if produto else "Cadastrar produto" }}
+        </button>
+    </div>
 </form>
 
 <p style="margin-top: 1.4rem;">

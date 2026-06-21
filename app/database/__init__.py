@@ -1,4 +1,5 @@
 import os
+from urllib.parse import quote_plus
 from flask_sqlalchemy import SQLAlchemy
 
 # Instância única do SQLAlchemy, usada por todos os models da aplicação.
@@ -27,13 +28,13 @@ def build_database_uri():
     # Conexão via Cloud SQL Auth Proxy / socket unix (usado no Cloud Run/App Engine)
     if db_user and db_password and db_name and instance_connection_name:
         return (
-            f"postgresql+psycopg2://{db_user}:{db_password}@/"
+            f"postgresql+psycopg2://{db_user}:{quote_plus(db_password)}@/"
             f"{db_name}?host=/cloudsql/{instance_connection_name}"
         )
 
     # Conexão via host/porta (ex: Cloud SQL Auth Proxy local, ou IP direto)
     if db_user and db_password and db_name:
-        return f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        return f"postgresql+psycopg2://{db_user}:{quote_plus(db_password)}@{db_host}:{db_port}/{db_name}"
 
     # Fallback local para desenvolvimento sem Cloud SQL configurado
     sqlite_path = os.path.join(os.path.dirname(__file__), "ecommerce.db")

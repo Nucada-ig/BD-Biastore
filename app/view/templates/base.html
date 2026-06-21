@@ -11,8 +11,8 @@
 </head>
 <body>
     <header class="topo">
-        {% if session.get('usuario_id') %}
-            {% if session.get('is_vendedor') %}
+        {% if session.get('tipo_sessao') %}
+            {% if session.get('tipo_sessao') == 'vendedor' %}
             <a class="marca" href="{{ url_for('vendedor.home') }}">
             {% else %}
             <a class="marca" href="{{ url_for('usuario.home') }}">
@@ -24,9 +24,9 @@
             <span class="marca__nome">BIA-Store</span>
         </a>
 
-        {% if session.get('usuario_id') %}
+        {% if session.get('tipo_sessao') %}
         <nav class="nav">
-            {% if session.get('is_vendedor') %}
+            {% if session.get('tipo_sessao') == 'vendedor' %}
                 <a href="{{ url_for('vendedor.cadastrar_produto') }}" class="nav__link {{ 'nav__link--ativo' if request.endpoint == 'vendedor.cadastrar_produto' }}">Novo produto</a>
             {% else %}
                 <form class="nav__busca" action="{{ url_for('produto.pesquisa') }}" method="get">

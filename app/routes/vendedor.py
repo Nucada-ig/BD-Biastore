@@ -13,7 +13,7 @@ def home():
     Home page do vendedor: visualizacao dos produtos cadastrados,
     com caminho para cadastro/edicao de produtos.
     """
-    produtos = ProdutoDAO.listar_por_vendedor(session["usuario_id"])
+    produtos = ProdutoDAO.listar_por_vendedor(session["vendedor_id"])
     return render_template("vendedor/home.html", produtos=produtos)
 
 
@@ -21,15 +21,23 @@ def home():
 @vendedor_obrigatorio
 def cadastrar_produto():
     """
-    Pagina para o cadastro de novos produtos: nome, imagem, preco, descricao.
+    Pagina para o cadastro de novos produtos: nome, categoria, preco, estoque.
     """
     if request.method == "POST":
+        prazo_raw = request.form.get("prazo_entrega")
         ProdutoDAO.criar(
-            nome=request.form.get("nome"),
-            preco=float(request.form.get("preco")),
-            vendedor_id=session["usuario_id"],
-            imagem=request.form.get("imagem"),
-            descricao=request.form.get("descricao"),
+            nome_produto=request.form.get("nome_produto"),
+            categoria=request.form.get("categoria"),
+            preco_unitario=float(request.form.get("preco_unitario")),
+            vendedor_id=session["vendedor_id"],
+            estoque=int(request.form.get("estoque", 0)),
+            imagem=request.form.get("imagem") or None,
+            descricao=request.form.get("descricao") or None,
+            material=request.form.get("material") or None,
+            peso=request.form.get("peso") or None,
+            dimensoes=request.form.get("dimensoes") or None,
+            prazo_entrega=int(prazo_raw) if prazo_raw and prazo_raw.strip() else None,
+            politica_troca=request.form.get("politica_troca") or None,
         )
         return redirect(url_for("vendedor.home"))
 
@@ -42,7 +50,7 @@ def _garantir_produto_do_vendedor(produto_id):
     Retorna o produto, ou interrompe a requisicao com 404 caso contrario.
     """
     item = ProdutoDAO.buscar_por_id(produto_id)
-    if item is None or item.vendedor_id != session["usuario_id"]:
+    if item is None or item.vendedor_id != session["vendedor_id"]:
         abort(404)
     return item
 
@@ -56,12 +64,20 @@ def editar_produto(produto_id):
     item = _garantir_produto_do_vendedor(produto_id)
 
     if request.method == "POST":
+        prazo_raw = request.form.get("prazo_entrega")
         ProdutoDAO.atualizar(
             produto_id,
-            nome=request.form.get("nome"),
-            preco=float(request.form.get("preco")),
-            imagem=request.form.get("imagem"),
-            descricao=request.form.get("descricao"),
+            nome_produto=request.form.get("nome_produto"),
+            categoria=request.form.get("categoria"),
+            preco_unitario=float(request.form.get("preco_unitario")),
+            estoque=int(request.form.get("estoque", 0)),
+            imagem=request.form.get("imagem") or None,
+            descricao=request.form.get("descricao") or None,
+            material=request.form.get("material") or None,
+            peso=request.form.get("peso") or None,
+            dimensoes=request.form.get("dimensoes") or None,
+            prazo_entrega=int(prazo_raw) if prazo_raw and prazo_raw.strip() else None,
+            politica_troca=request.form.get("politica_troca") or None,
         )
         return redirect(url_for("produto.ver_produto", produto_id=produto_id))
 

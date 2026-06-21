@@ -1,39 +1,164 @@
 {% extends "base.html" %}
-{% block titulo %}{{ produto.nome if produto else "Produto" }}{% endblock %}
+{% block titulo %}{{ produto.nome_produto if produto else "Produto" }}{% endblock %}
 {% block conteudo %}
 {% if produto %}
+
 <div class="produto-detalhe">
+
+    <!-- Imagem -->
     <div class="produto-detalhe__imagem">
         {% if produto.imagem %}
-            <img src="{{ produto.imagem }}" alt="{{ produto.nome }}">
+            <img src="{{ produto.imagem }}" alt="{{ produto.nome_produto }}">
         {% else %}
-            sem imagem
+            <div class="cartao-produto__placeholder" style="gap:0.8rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="1.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                    <line x1="12" y1="12" x2="12" y2="16"/>
+                    <line x1="10" y1="14" x2="14" y2="14"/>
+                </svg>
+                <span>{{ produto.categoria }}</span>
+            </div>
         {% endif %}
     </div>
-    <div>
-        <span class="eyebrow">Detalhes do produto</span>
-        <h1>{{ produto.nome }}</h1>
-        <p class="produto-detalhe__preco">R$ {{ "%.2f"|format(produto.preco) }}</p>
-        <p>{{ produto.descricao or "Sem descrição cadastrada." }}</p>
 
-        {% if eh_vendedor_dono %}
-            <div style="display:flex; gap:0.8rem; margin-top:1.2rem;">
-                <a href="{{ url_for('vendedor.editar_produto', produto_id=produto.id) }}" class="botao botao--secundario">Editar produto</a>
-                <form action="{{ url_for('vendedor.deletar_produto', produto_id=produto.id) }}" method="post">
-                    <button type="submit" class="botao botao--perigo">Excluir produto</button>
-                </form>
-            </div>
-        {% else %}
-            <form action="{{ url_for('carrinho.adicionar', produto_id=produto.id) }}" method="post" style="display:flex; gap:0.8rem; margin-top:1.2rem; align-items:center;">
-                <input type="number" name="quantidade" value="1" min="1" style="width:80px; padding:0.6rem; border:1px solid var(--cor-borda); border-radius:var(--raio);">
-                <button type="submit" class="botao botao--primario">Adicionar ao carrinho</button>
-            </form>
+    <!-- Painel direito -->
+    <div class="produto-detalhe__info">
+        <span class="eyebrow">{{ produto.categoria }}</span>
+        <h1 style="margin-bottom:0.4rem;">{{ produto.nome_produto }}</h1>
+
+        <p class="produto-detalhe__preco">R$ {{ "%.2f"|format(produto.preco_unitario) }}</p>
+
+        <!-- Estoque -->
+        {% if produto.estoque == 0 %}
+        <p class="produto-detalhe__estoque produto-detalhe__estoque--esgotado">Produto esgotado</p>
+        {% elif produto.estoque <= 5 %}
+        <p class="produto-detalhe__estoque produto-detalhe__estoque--alerta">
+            Últimas {{ produto.estoque }} unidade{{ 's' if produto.estoque != 1 else '' }} em estoque
+        </p>
         {% endif %}
+
+        <!-- Ações -->
+        {% if eh_vendedor_dono %}
+        <div style="display:flex; gap:0.8rem; margin-bottom:1.2rem; flex-wrap:wrap;">
+            <a href="{{ url_for('vendedor.editar_produto', produto_id=produto.produto_id) }}"
+               class="botao botao--secundario">Editar produto</a>
+            <form action="{{ url_for('vendedor.deletar_produto', produto_id=produto.produto_id) }}" method="post">
+                <button type="submit" class="botao botao--perigo">Excluir produto</button>
+            </form>
+        </div>
+        {% else %}
+        <form id="form-carrinho"
+              action="{{ url_for('carrinho.adicionar', produto_id=produto.produto_id) }}" method="post"
+              style="display:flex; gap:0.8rem; margin-bottom:1.2rem; align-items:center; flex-wrap:wrap;">
+            <input type="number" name="quantidade" value="1" min="1"
+                   style="width:80px; padding:0.6rem; border:1px solid var(--cor-borda); border-radius:var(--raio);"
+                   {% if produto.estoque == 0 %}disabled{% endif %}>
+            <button type="submit" id="btn-carrinho" class="botao botao--primario"
+                    {% if produto.estoque == 0 %}disabled style="opacity:0.5;cursor:not-allowed;"{% endif %}>
+                {% if produto.estoque == 0 %}Produto esgotado{% else %}Adicionar ao carrinho{% endif %}
+            </button>
+        </form>
+
+        <div id="toast-carrinho" class="toast" aria-live="polite" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Produto adicionado ao carrinho
+        </div>
+
+        <script>
+        document.getElementById('form-carrinho').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var form = this;
+            var btn = document.getElementById('btn-carrinho');
+            var toast = document.getElementById('toast-carrinho');
+
+            btn.disabled = true;
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.ok) {
+                    toast.removeAttribute('hidden');
+                    setTimeout(function () { toast.setAttribute('hidden', ''); }, 2500);
+                }
+            })
+            .finally(function () { btn.disabled = false; });
+        });
+        </script>
+        {% endif %}
+
+        <!-- Seções expandíveis -->
+        <div class="produto-secoes">
+
+            <details class="produto-secao">
+                <summary class="produto-secao__titulo">Descrição</summary>
+                <div class="produto-secao__corpo">
+                    {% if produto.descricao %}
+                    <p>{{ produto.descricao }}</p>
+                    {% else %}
+                    <p>Descrição não informada.</p>
+                    {% endif %}
+                </div>
+            </details>
+
+            <details class="produto-secao">
+                <summary class="produto-secao__titulo">Composição</summary>
+                <div class="produto-secao__corpo">
+                    {% if produto.material %}
+                    <p>{{ produto.material }}</p>
+                    {% else %}
+                    <p>Composição não informada.</p>
+                    {% endif %}
+                </div>
+            </details>
+
+            <details class="produto-secao">
+                <summary class="produto-secao__titulo">Especificações</summary>
+                <div class="produto-secao__corpo">
+                    {% if produto.peso or produto.dimensoes %}
+                    <table class="tabela-specs">
+                        {% if produto.peso %}
+                        <tr><th>Peso</th><td>{{ produto.peso }}</td></tr>
+                        {% endif %}
+                        {% if produto.dimensoes %}
+                        <tr><th>Dimensões / Tamanho</th><td>{{ produto.dimensoes }}</td></tr>
+                        {% endif %}
+                    </table>
+                    {% else %}
+                    <p>Especificações não informadas.</p>
+                    {% endif %}
+                </div>
+            </details>
+
+            <details class="produto-secao">
+                <summary class="produto-secao__titulo">Troca e devolução</summary>
+                <div class="produto-secao__corpo">
+                    {% if produto.politica_troca %}
+                    <p>{{ produto.politica_troca }}</p>
+                    {% else %}
+                    <p>Consulte a política de troca e devolução com o vendedor.</p>
+                    {% endif %}
+                </div>
+            </details>
+
+        </div>
     </div>
 </div>
+
 {% else %}
 <div class="estado-vazio">
     <p>Este produto não foi encontrado.</p>
+    <a href="{{ url_for('usuario.home') }}" class="botao botao--secundario">Voltar à vitrine</a>
 </div>
 {% endif %}
 {% endblock %}

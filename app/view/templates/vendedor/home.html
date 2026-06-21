@@ -15,17 +15,18 @@
 {% if produtos %}
 <div class="grade-produtos">
     {% for produto in produtos %}
-    <a class="cartao-produto" href="{{ url_for('produto.ver_produto', produto_id=produto.id) }}">
+    <a class="cartao-produto" href="{{ url_for('produto.ver_produto', produto_id=produto.produto_id) }}">
         <div class="cartao-produto__imagem">
             {% if produto.imagem %}
-                <img src="{{ produto.imagem }}" alt="{{ produto.nome }}">
+                <img src="{{ produto.imagem }}" alt="{{ produto.nome_produto }}">
             {% else %}
-                sem imagem
+                {{ produto.categoria }}
             {% endif %}
         </div>
         <div class="cartao-produto__corpo">
-            <span class="cartao-produto__nome">{{ produto.nome }}</span>
-            <span class="cartao-produto__preco">R$ {{ "%.2f"|format(produto.preco) }}</span>
+            <span class="cartao-produto__nome">{{ produto.nome_produto }}</span>
+            <span class="cartao-produto__preco">R$ {{ "%.2f"|format(produto.preco_unitario) }}</span>
+            <span class="item-linha__detalhe">Estoque: {{ produto.estoque }}</span>
         </div>
     </a>
     {% endfor %}

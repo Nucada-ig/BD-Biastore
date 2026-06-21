@@ -1,0 +1,20 @@
+# Variáveis de ambiente — nunca commitar
+.env
+
+# Banco SQLite local (desenvolvimento)
+*.db
+*.sqlite3
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# IDEs
+.idea/
+.vscode/
+*.iml

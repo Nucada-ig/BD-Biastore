@@ -6,17 +6,23 @@
     <h1>Meu carrinho</h1>
 </div>
 
+{% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in msgs %}
+    <div class="mensagem-{{ cat }}" style="margin-bottom:1rem;">{{ msg }}</div>
+    {% endfor %}
+{% endwith %}
+
 {% if itens %}
 <div class="lista-itens">
     {% for item in itens %}
     <div class="item-linha">
         <div class="item-linha__info">
-            <span class="item-linha__nome">{{ item.produto.nome }}</span>
-            <span class="item-linha__detalhe">Qtd: {{ item.quantidade }} · R$ {{ "%.2f"|format(item.produto.preco) }} cada</span>
+            <span class="item-linha__nome">{{ item.produto.nome_produto }}</span>
+            <span class="item-linha__detalhe">Qtd: {{ item.quantidade }} · R$ {{ "%.2f"|format(item.preco_historico) }} cada</span>
         </div>
         <div class="item-linha__acoes">
-            <span class="item-linha__nome">R$ {{ "%.2f"|format(item.quantidade * item.produto.preco) }}</span>
-            <form action="{{ url_for('carrinho.remover', item_id=item.id) }}" method="post">
+            <span class="item-linha__nome">R$ {{ "%.2f"|format(item.quantidade * item.preco_historico) }}</span>
+            <form action="{{ url_for('carrinho.remover', produto_id=item.produto_id) }}" method="post">
                 <button type="submit" class="botao botao--perigo">Remover</button>
             </form>
         </div>
@@ -24,13 +30,73 @@
     {% endfor %}
 </div>
 
-<div class="resumo-total">
-    <span>Total</span>
-    <span class="resumo-total__valor">R$ {{ "%.2f"|format(total) }}</span>
-</div>
-
 <form action="{{ url_for('carrinho.finalizar') }}" method="post">
-    <button type="submit" class="botao botao--primario botao--bloco">Finalizar compra</button>
+    <div class="checkout-grade">
+
+        <!-- Coluna esquerda: endereço de entrega -->
+        <div class="secao-entrega">
+            <span class="secao-titulo">Endereço de entrega</span>
+
+            {% if enderecos %}
+            <div class="lista-enderecos-selecao">
+                {% for end in enderecos %}
+                <input type="radio" id="end-{{ end.endereco_id }}" name="endereco_id"
+                       value="{{ end.endereco_id }}" class="endereco-radio"
+                       {% if loop.first %}checked{% endif %}>
+                <label for="end-{{ end.endereco_id }}" class="endereco-card">
+                    <span class="endereco-card__indicador"></span>
+                    <span class="endereco-card__info">
+                        <span class="endereco-card__principal">
+                            {{ end.codigo_postal.bairro }}, {{ end.numero }}{% if end.complemento %} — {{ end.complemento }}{% endif %}
+                        </span>
+                        <span class="endereco-card__secundario">
+                            {{ end.codigo_postal.cidade }}/{{ end.codigo_postal.estado }}
+                            · CEP {{ end.cep[:5] }}-{{ end.cep[5:] }}
+                        </span>
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+            <a href="{{ url_for('usuario.perfil', aba='enderecos') }}" class="endereco-link-adicionar">
+                + Adicionar novo endereço
+            </a>
+
+            {% else %}
+            <div class="estado-vazio" style="padding:1.4rem; margin-top:0.5rem;">
+                <p style="margin-bottom:0.9rem;">Você não tem endereços cadastrados.</p>
+                <a href="{{ url_for('usuario.perfil', aba='enderecos') }}" class="botao botao--secundario">
+                    Cadastrar endereço
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Coluna direita: pagamento + total + botão -->
+        <div class="checkout-painel-pagamento">
+            <span class="secao-titulo">Resumo e pagamento</span>
+
+            <div class="resumo-total resumo-total--painel">
+                <span>Total</span>
+                <span class="resumo-total__valor">R$ {{ "%.2f"|format(total) }}</span>
+            </div>
+
+            <div class="campo">
+                <label for="metodo_pagamento">Forma de pagamento</label>
+                <select id="metodo_pagamento" name="metodo_pagamento" required>
+                    <option value="PIX">PIX</option>
+                    <option value="CARTAO_CREDITO">Cartão de crédito</option>
+                    <option value="BOLETO">Boleto</option>
+                    <option value="TRANSFERENCIA">Transferência</option>
+                </select>
+            </div>
+
+            <button type="submit" class="botao botao--primario botao--bloco"
+                    {% if not enderecos %}disabled style="opacity:0.5;cursor:not-allowed;"{% endif %}>
+                Finalizar compra
+            </button>
+        </div>
+
+    </div>
 </form>
 {% else %}
 <div class="estado-vazio">

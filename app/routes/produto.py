@@ -10,19 +10,35 @@ produto = Blueprint("produto", __name__, url_prefix="/produto")
 @login_obrigatorio
 def pesquisa():
     """
-    Busca no catalogo geral os produtos de acordo com a busca do usuario.
-    Permite filtro futuro (preco, categoria, etc.) via querystring.
+    Busca no catálogo com filtros opcionais de texto e categoria via querystring:
+        ?q=termo        filtra por nome
+        ?categoria=X    filtra por categoria
+    Os dois filtros são cumulativos.
     """
     termo = request.args.get("q", "")
+    categoria_ativa = request.args.get("categoria", "")
+
     produtos = ProdutoDAO.buscar_por_nome(termo) if termo else ProdutoDAO.listar_todos()
-    return render_template("produto/pesquisa.html", produtos=produtos, termo=termo)
+
+    if categoria_ativa:
+        produtos = [p for p in produtos if p.categoria == categoria_ativa]
+
+    categorias = ProdutoDAO.listar_categorias()
+
+    return render_template(
+        "produto/pesquisa.html",
+        produtos=produtos,
+        termo=termo,
+        categoria_ativa=categoria_ativa,
+        categorias=categorias,
+    )
 
 
 @produto.route("/<int:produto_id>")
 @login_obrigatorio
 def ver_produto(produto_id):
     """
-    Abre a pagina de informacoes do produto: preco, imagem, descricao etc.
+    Abre a pagina de informacoes do produto: preco, categoria, estoque etc.
     Se o usuario logado for o vendedor dono do produto, exibe tambem as
     opcoes de editar/excluir.
     """
@@ -31,8 +47,8 @@ def ver_produto(produto_id):
         return render_template("produto/produto.html", produto=None), 404
 
     eh_vendedor_dono = (
-        session.get("is_vendedor")
-        and item.vendedor_id == session.get("usuario_id")
+        session.get("tipo_sessao") == "vendedor"
+        and item.vendedor_id == session.get("vendedor_id")
     )
 
     return render_template(

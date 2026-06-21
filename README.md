@@ -67,30 +67,21 @@ ecommerce/
 
 ## Contas de teste
 
+## Contas de teste
+ 
 Criadas automaticamente pelo `seed.py`:
-
-| Perfil    | E-mail               | Senha    |
-|-----------|-----------------------|----------|
-| Cliente   | cliente@teste.com     | 123456   |
-| Vendedor  | loja@biastore.com     | 123456   |
+ 
+| Perfil    | E-mail                       | Senha    |
+|-----------|------------------------------|----------|
+| Cliente   | cliente@teste.com            | 123456   |
+| Vendedor  | loja@biastore.com            | 123456   |
+| Vendedor  | loja@passocerto.com          | 123456   |
+| Vendedor  | loja@urbanoacessorios.com    | 123456   |
+ 
+Cada vendedor já possui 3 produtos cadastrados (total de 9 produtos no catálogo).
 
 > Senhas armazenadas em texto puro propositalmente nesta etapa do projeto (foco em fluxo/funcionalidades). Hash de senha e validação de campos serão implementados em uma etapa posterior.
 
-## Banco de dados (Google Cloud SQL)
-
-Por padrão, sem nenhuma variável de ambiente configurada, a aplicação usa um arquivo SQLite local (`app/database/ecommerce.db`) — ideal para desenvolvimento.
-
-Para conectar a uma instância PostgreSQL no Google Cloud SQL, defina as variáveis de ambiente:
-
-```bash
-DB_USER=usuario_do_banco
-DB_PASSWORD=senha_do_banco
-DB_NAME=nome_do_banco
-DB_HOST=127.0.0.1          # ou o IP da instância
-DB_PORT=5432
-# alternativamente, em ambientes Cloud Run/App Engine:
-INSTANCE_CONNECTION_NAME=projeto:regiao:instancia
-```
 
 A lógica de montagem da URI de conexão está em `app/database/__init__.py`.
  
