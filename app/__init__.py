@@ -1,6 +1,7 @@
 from flask import Flask
 from app.database import db, build_database_uri
-
+from dotenv import load_dotenv
+load_dotenv()  # Carrega variáveis de ambiente do arquivo .env
 
 def create_app():
     """
