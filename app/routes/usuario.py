@@ -20,6 +20,7 @@ def home():
 
     produtos_destaque = ProdutoDAO.listar_por_categoria(tops[0], limite=10) if tops else []
     produtos_mix = ProdutoDAO.listar_mix_categorias(tops, limite_por_categoria=5) if tops else []
+    produtos_descoberta = ProdutoDAO.listar_mix_aleatorio(n_categorias=3, limite_por_categoria=5) if not tops else []
     produtos, total = ProdutoDAO.listar_paginado(pagina, por_pagina)
     total_paginas = max(1, -(-total // por_pagina))  # ceil division
 
@@ -28,6 +29,7 @@ def home():
         produtos=produtos,
         produtos_destaque=produtos_destaque,
         produtos_mix=produtos_mix,
+        produtos_descoberta=produtos_descoberta,
         categoria_destaque=tops[0] if tops else None,
         pagina=pagina,
         total_paginas=total_paginas,

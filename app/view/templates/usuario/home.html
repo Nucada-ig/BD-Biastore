@@ -48,7 +48,7 @@
 
 {% block conteudo %}
 
-{# ── Carrosséis de recomendação (visíveis apenas com histórico de compras) ── #}
+{# ── Carrosséis personalizados (usuários com histórico de compras) ── #}
 {% if produtos_destaque %}
 <section class="secao-recomendacao">
     <div class="secao-recomendacao__cabecalho">
@@ -79,12 +79,25 @@
 </section>
 {% endif %}
 
+{# ── Carrossel de descoberta (usuários sem histórico de compras) ── #}
+{% if produtos_descoberta %}
+<section class="secao-recomendacao">
+    <div class="secao-recomendacao__cabecalho">
+        <h2>Talvez você possa gostar</h2>
+    </div>
+    <div class="carrossel-wrapper">
+        <button class="carrossel-seta carrossel-seta--esq" onclick="moverCarrossel('carrossel-descoberta', -1)" aria-label="Anterior">&#8249;</button>
+        <div class="carrossel" id="carrossel-descoberta">
+            {% for p in produtos_descoberta %}{{ cartao(p) }}{% endfor %}
+        </div>
+        <button class="carrossel-seta carrossel-seta--dir" onclick="moverCarrossel('carrossel-descoberta', 1)" aria-label="Próximo">&#8250;</button>
+    </div>
+</section>
+{% endif %}
+
 {# ── Vitrine geral ── #}
-<div class="cabecalho-pagina" style="margin-top:{% if produtos_destaque %}2rem{% else %}0{% endif %}">
-    <h1>{% if produtos_destaque %}Tudo na loja{% else %}Recomendados{% endif %}</h1>
-    {% if not produtos_destaque %}
-    <p>Uma seleção de produtos para você descobrir hoje.</p>
-    {% endif %}
+<div class="cabecalho-pagina" style="margin-top:{% if produtos_destaque or produtos_descoberta %}2rem{% else %}0{% endif %}">
+    <h1>Tudo na loja</h1>
 </div>
 
 {% if produtos %}

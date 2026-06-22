@@ -12,8 +12,10 @@ def create_app():
         static_folder="view/static"
     )
 
-    # Configurações gerais da aplicação
-    app.config["SECRET_KEY"] = "troque-essa-chave-em-producao"
+
+    # Chave secreta para assinar cookies de sessão
+    import os
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-troque-em-producao")
 
     # Configuração do banco de dados:
     # usa Postgres/Cloud SQL se as variáveis de ambiente estiverem definidas,
@@ -31,9 +33,6 @@ def create_app():
     from app.routes import register_blueprints
     register_blueprints(app)
 
-    # OBS: não usamos db.create_all() aqui, pois as tabelas já são
-    # criadas/gerenciadas diretamente no Cloud SQL (via SQL Studio /
-    # migrations). Em ambiente local com SQLite, rode manualmente
-    # `flask shell` -> `db.create_all()` se precisar criar as tabelas.
+   
 
     return app

@@ -86,6 +86,33 @@ class ProdutoDAO:
         return resultado
 
     @staticmethod
+    def listar_mix_aleatorio(n_categorias: int = 3, limite_por_categoria: int = 5) -> list:
+        """
+        Escolhe n_categorias aleatórias e retorna um mix embaralhado de produtos.
+        Usado na home para usuários sem histórico de compras.
+        """
+        import random
+        from sqlalchemy import func
+        todas = [
+            r[0] for r in
+            db.session.query(Produto.categoria).distinct().all()
+        ]
+        random.shuffle(todas)
+        categorias = todas[:n_categorias]
+        resultado = []
+        for cat in categorias:
+            produtos = (
+                db.session.query(Produto)
+                .filter_by(categoria=cat)
+                .order_by(func.random())
+                .limit(limite_por_categoria)
+                .all()
+            )
+            resultado.extend(produtos)
+        random.shuffle(resultado)
+        return resultado
+
+    @staticmethod
     def buscar_por_nome(termo):
         """
         Busca produtos cujo nome contenha o termo informado (case-insensitive).
